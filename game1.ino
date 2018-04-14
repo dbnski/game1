@@ -111,7 +111,7 @@ int coin_y = ground_y - 12;
 int coin_wait = 0;
 int coin_expire = 0;
 
-byte lives = 1;
+byte lives = 3;
 byte score = 0;
 
 void setup(){
