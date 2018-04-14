@@ -128,14 +128,35 @@ void loop(){
   if(gb.update()){
     if (!lives) {
       gb.display.clear();
-      gb.popup(F("GAME OVER"), 40);
+
+      gb.display.fillScreen(BLACK);
+
+      gb.display.setColor(WHITE, BLACK);
+      gb.display.cursorX = 25;
+      gb.display.cursorY = 22;
+      gb.display.println("YOU DIED");
+      gb.display.setColor(BLACK, WHITE);
 
       EEPROM.write(0, high_score);
 
+      if (!gb.buttons.pressed(BTN_A)) {
+        return;
+      }
+
+      player_x = LCDWIDTH / 2 - 4;
+      player_y = ground_y - 8;
+      player_moving = -1;
+      player_jumping = 0;
+
+      projectile_x = -1;
+      projectile_wait = 0;
+
+      coin_x = 0;
+      coin_wait = 0;
+      coin_expire = 0;
+
       lives = 3;
       score = 0;
-
-      wait(40);
     }
 
     gb.display.clear();
@@ -156,12 +177,12 @@ void loop(){
     }
 
     if (!coin_wait) {
-      coin_wait = gb.frameCount + rand() % 250 + 50;
+      coin_wait = gb.frameCount + rand() % 100 + 100;
     }
 
     if (!coin_x && gb.frameCount >= coin_wait) {
       coin_x = player_x > LCDWIDTH - player_x ? 10 + rand() % 15 : LCDWIDTH - (10 + rand() % 15);
-      coin_expire = gb.frameCount + 250;
+      coin_expire = gb.frameCount + 200;
     }
 
     if (coin_x) {
@@ -177,6 +198,7 @@ void loop(){
       if (gb.frameCount >= coin_expire) {
         coin_x = 0;
         coin_wait = 0;
+        coin_expire = 0;
       }
     }
 
@@ -282,7 +304,7 @@ void loop(){
       if (gb.frameCount % 2 == 0) {
         frame++;
 
-        if (frame == PLAYER_LEN - 1) {
+        if (frame >= PLAYER_LEN - 1) {
           frame = 0;
         }
       }
