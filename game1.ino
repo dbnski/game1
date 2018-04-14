@@ -111,7 +111,7 @@ int coin_y = ground_y - 12;
 int coin_wait = 0;
 int coin_expire = 0;
 
-byte lives = 3;
+byte lives = 1;
 byte score = 0;
 
 void setup(){
@@ -139,8 +139,18 @@ void loop(){
 
       gb.display.setColor(WHITE, BLACK);
       gb.display.cursorX = 25;
-      gb.display.cursorY = 22;
+      gb.display.cursorY = 15;
       gb.display.println("YOU DIED");
+
+      gb.display.cursorX = 25;
+      gb.display.cursorY = 25;
+      gb.display.print("SCORE: ");
+      gb.display.println(score);
+      if (score && score == high_score) {
+        gb.display.cursorX = 20;
+        gb.display.cursorY = 35;
+        gb.display.println("HIGH SCORE!");        
+      }
       gb.display.setColor(BLACK, WHITE);
 
       EEPROM.write(0, high_score);
