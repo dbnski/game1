@@ -118,6 +118,80 @@ const byte COIN[] PROGMEM = {
   B01110000
 };
 
+const byte BOMB[][10] PROGMEM = {
+{
+  8, 5,
+  B00111000,
+  B00010000,
+  B00111000,
+  B00111000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 4,
+  B00111000,
+  B00010000,
+  B00111000,
+  B01111100,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 3,
+  B10111010,
+  B11010110,
+  B01111100,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 3,
+  B10111010,
+  B11010110,
+  B01111100,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 4,
+  B10101010,
+  B01010111,
+  B10111011,
+  B11010110,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 4,
+  B10101010,
+  B01010111,
+  B10111011,
+  B11010110,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},{
+  8, 2,
+  B10101010,
+  B01010111,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+}};
+
+
 byte high_score = EEPROM.read(0);
 
 byte frame = 0;
@@ -143,6 +217,11 @@ int coin_x = 0;
 int coin_y = ground_y - 12;
 int coin_wait = 0;
 int coin_expire = 0;
+
+int bomb_x = -1;
+int bomb_y = -1;
+int bomb_frame;
+int bomb_wait = 0;
 
 byte lives = 3;
 byte score = 0;
@@ -275,6 +354,54 @@ void loop(){
         coin_expire = 0;
       }
     }
+
+    if (!bomb_wait) {
+      bomb_wait = gb.frameCount + rand() % 100 + 100;
+    }
+
+    if (bomb_wait && gb.frameCount >= bomb_wait) {
+      if (bomb_x < 0) {
+        bomb_x = rand() % (LCDWIDTH - 40) + 20;
+      }
+
+      if (bomb_y < 0) {
+        bomb_y = 6;
+      }
+
+      bomb_y = bomb_y + 1;
+
+      if (bomb_y <= ground_y - 5) {
+        bomb_frame = 0;
+      }
+      else {
+        bomb_frame = bomb_frame + 1;
+      }
+
+      if (bomb_frame < 7) {
+        int _bomb_y = bomb_frame == 0 ? bomb_y : ground_y - BOMB[bomb_frame][1] - 4;
+
+        gb.display.drawBitmap(bomb_x, _bomb_y, BOMB[bomb_frame], NOROT, NOFLIP);     
+
+        if (gb.collideRectRect(player_x + player_x_mod, player_y + player_y_mod, 8 - player_x_mod, 8 - player_y_mod, bomb_x, _bomb_y, 8, BOMB[bomb_frame][1])) {
+          gb.sound.playTick();
+  
+          bomb_x = -1;
+          bomb_y = -1;
+          bomb_wait = 0;
+
+          projectile_x = -1;
+          projectile_wait = 0;
+  
+          lives = lives - 1;
+        }
+      }
+      else {
+        bomb_x = -1;
+        bomb_y = -1;
+        bomb_wait = 0;
+      }
+    }
+
 
     if (!projectile_wait) {
       projectile_wait = gb.frameCount + rand() % 40 + 10;
