@@ -138,19 +138,30 @@ void loop(){
       gb.display.fillScreen(BLACK);
 
       gb.display.setColor(WHITE, BLACK);
-      gb.display.cursorX = 25;
+      gb.display.cursorX = 26;
       gb.display.cursorY = 15;
       gb.display.println("YOU DIED");
 
-      gb.display.cursorX = 25;
+      gb.display.cursorX = 20;
       gb.display.cursorY = 25;
       gb.display.print("SCORE: ");
+      if (score < 10) {
+        gb.display.print("000");
+      }
+      else if (score < 100) {
+        gb.display.print("00");
+      }
+      else if (score < 100) {
+        gb.display.print("0");
+      }
       gb.display.println(score);
+
       if (score && score == high_score) {
         gb.display.cursorX = 20;
         gb.display.cursorY = 35;
         gb.display.println("HIGH SCORE!");        
       }
+
       gb.display.setColor(BLACK, WHITE);
 
       EEPROM.write(0, high_score);
