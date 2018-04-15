@@ -20,37 +20,64 @@ byte high_score = EEPROM.read(0);
 
 int ground_y = LCDHEIGHT - 4;
 
-byte player_frame = 0;
-byte player_flip = NOFLIP;
-int player_x = LCDWIDTH / 2 - 4;
-int player_x_mod = 0;
-int player_y = ground_y - 8;
-int player_y_mod = 0;
-int player_vy = 2;
-int player_vx = 1;
-int player_moving = -1;
-int player_jumping = 0;
+// Player sprite index.
+byte player_frame;
+// Player sprite orientation.
+byte player_flip;
+// Player position on the x-axis.
+int player_x;
+// Player sprite width modifier.
+int player_x_mod;
+// Player position on the y-axis.
+int player_y;
+// Player sprite height modifier.
+int player_y_mod;
+// Player's vertical velocity.
+int player_vy;
+// Player's horizontal velocity.
+int player_vx;
+// Is player moving in any direction?
+int player_moving;
+// Is player jumping?
+int player_jumping;
 
-bool projectile = false;
-int projectile_x = -1;
-int projectile_y = ground_y - 4;
-int projectile_vx = 1;
-int projectile_wait = 60;
+// Is there a projectile on the screen?
+bool projectile;
+// Projectile position on the x-axis.
+int projectile_x;
+// Projectile position on the y-axis.
+int projectile_y;
+// Projectile's horizontal velocity.
+int projectile_vx;
+// Delay until we can shoot another projectile.
+int projectile_wait;
 
-bool coin = false;
-int coin_x = 0;
-int coin_y = ground_y - 12;
+// Is there a coin on the screen?
+bool coin;
+// Coin position on the x-axis.
+int coin_x;
+// Coin position on the y-axis.
+int coin_y;
+// Delay until we can show another coin.
 int coin_wait = 0;
+// How long do we wait for the player to pick the coin?
 int coin_expire = 0;
 
-bool bomb = false;
-int bomb_x = -1;
-int bomb_y = -1;
+// Is there a bomb on the screen?
+bool bomb;
+// Bomb position on the x-axis.
+int bomb_x;
+// Bomb position on the y-axis.
+int bomb_y;
+// Bomb sprite index.
 int bomb_frame;
-int bomb_wait = 0;
+// Delay until we can drop another bomb.
+int bomb_wait;
 
-byte lives = 3;
-byte score = 0;
+// Lives remaining.
+byte lives;
+// Current score.
+byte score;
 
 void wait(int frames) {
   bool p = gb.display.persistence;
@@ -80,19 +107,28 @@ bool is_visible(int x, int y) {
 }
 
 void game_reset() {
+  player_flip = NOFLIP;
   player_x = LCDWIDTH / 2 - 4;
   player_y = ground_y - 8;
+  player_vx = 1;
+  player_vy = 2;
   player_moving = -1;
   player_jumping = 0;
-  
+
+  projectile = false;
   projectile_x = -1;
+  projectile_y = ground_y - 4;
+  projectile_vx = 2;
   projectile_wait = 0;
   
+  bomb = false;
   bomb_x = -1;
   bomb_y = -1;
   bomb_wait = 0;
-  
-  coin_x = 0;
+
+  coin = false;
+  coin_x = -1;
+  coin_y = ground_y - 12;
   coin_wait = 0;
   coin_expire = 0;
   
@@ -112,6 +148,8 @@ void setup() {
   gb.titleScreen(F("GAME1"), LOGO);
 
   gb.battery.show = false;
+
+  game_reset();
 }
 
 void loop(){
