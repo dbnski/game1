@@ -51,9 +51,13 @@ int projectile_y;
 int projectile_vx;
 // Delay until we can shoot another projectile.
 int projectile_wait;
+//
+int projectile_slow;
 
 // Is there a coin on the screen?
 bool coin;
+// Coin type
+byte coin_type;
 // Coin position on the x-axis.
 int coin_x;
 // Coin position on the y-axis.
@@ -120,6 +124,7 @@ void game_reset() {
   projectile_y = ground_y - 4;
   projectile_vx = 2;
   projectile_wait = 0;
+  projectile_slow = 0;
   
   bomb = false;
   bomb_x = -1;
@@ -127,6 +132,7 @@ void game_reset() {
   bomb_wait = 0;
 
   coin = false;
+  coin_type = 0;
   coin_x = -1;
   coin_y = ground_y - 12;
   coin_wait = 0;
@@ -376,7 +382,24 @@ void loop(){
 
     // Can we show a new coin?
     if (!coin && gb.frameCount >= coin_wait) {
+      int coin_weights[] = {
+        50,
+        25,
+        25
+      };
+      int rnd = rand() % 100 + 1;
+
       coin = true;
+      coin_type = 0;
+
+      for (byte i = 0; i < COIN_LEN; i++) {
+        rnd = rnd - coin_weights[i];
+
+        if (rnd < 0) {
+          coin_type = i;
+          break;
+        }
+      }
 
       // Position is set on the opposite side of the screen to the player.
       coin_x = player_x > LCDWIDTH / 2 ? 10 + rand() % 15 : LCDWIDTH - (10 + rand() % 15);
@@ -388,17 +411,39 @@ void loop(){
     // Is there a coin to draw?
     if (coin) {
       // Draw the coin.
-      gb.display.drawBitmap(coin_x, coin_y, COIN, NOROT, NOFLIP);
+      gb.display.drawBitmap(coin_x, coin_y, COIN[coin_type], NOROT, NOFLIP);
 
       // Is player touching the coin?
       if (gb.collideRectRect(player_x + player_x_mod, player_y + player_y_mod, 8 - player_x_mod, 8 - player_y_mod, coin_x, coin_y, 5, 5)) {
         gb.sound.playOK();
 
-        // A coin is worth 2 points.
-        score = score + 2;
+        switch (coin_type) {
+          case 0:
+            // A coin is worth 2 points.
+            score = score + 2;
+            break;
+
+          case 1:
+            // Remove bombs for 20 seconds.
+            bomb = false;
+            bomb_x = -1;
+            bomb_y = -1;
+            bomb_wait = gb.frameCount + 400;
+            break;
+
+          case 2:
+            // Slow down projectiles for 20 seconds.
+            projectile_vx = projectile_vx > 0 ? 1 : -1;
+            projectile_slow = gb.frameCount + 400;
+            break;
+
+          default:
+            break;
+        }
 
         // Reset coin.
         coin = false;
+        coin_type = 0;
         coin_x = 0;
         coin_wait = 0;
       }
@@ -407,6 +452,7 @@ void loop(){
       if (gb.frameCount >= coin_expire) {
         // Reset coin.
         coin = false;
+        coin_type = 0;
         coin_x = 0;
         coin_wait = 0;
         coin_expire = 0;
@@ -504,7 +550,7 @@ void loop(){
       gb.sound.playCancel();
 
       // Choose vertical velocity.
-      projectile_vx = rand() % 2 + 2;
+      projectile_vx = !projectile_slow ? rand() % 2 + 2 : 2;
 
       // Choose height at which the projectile will fly.
       projectile_y = ground_y - 4 * (rand() % 3 + 1); 
@@ -552,6 +598,10 @@ void loop(){
         bomb_x = -1;
         bomb_y = -1;
         bomb_wait = 0;
+      }
+
+      if (gb.frameCount > projectile_slow) {
+        projectile_slow = 0;
       }
     }
 
