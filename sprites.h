@@ -93,15 +93,31 @@ const byte BLOCK[] PROGMEM = {
   B11111111
 };
 
-const byte COIN[] PROGMEM = {
-  8,
-  5,
+const byte COIN[][10] PROGMEM = {
+{
+  8, 5,
   B01110000,
   B10001000,
   B10111000,
   B10001000,
   B01110000
-};
+},{
+  8, 5,
+  B00100000,
+  B01010000,
+  B10101000,
+  B01010000,
+  B00100000
+},{
+  8, 5,
+  B01110000,
+  B11111000,
+  B11111000,
+  B10001000,
+  B01110000
+}};
+
+const int COIN_LEN = 3;
 
 const byte BOMB[][10] PROGMEM = {
 {
