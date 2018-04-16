@@ -424,23 +424,21 @@ void loop(){
 
     if (!bomb && !bomb_wait) {
       // Calculate when a new bomb should drop.
-      bomb_wait = gb.frameCount + rand() % 100 + 100;
+      bomb_wait = gb.frameCount + rand() % 100 + 50;
     }
 
     // Can we show a new bomb?
-    if (!bomb && bomb_wait) {
+    if (!bomb && gb.frameCount >= bomb_wait) {
       bomb = true;
 
-      if (bomb_x < 0) {
-        // Drop bombs somewhere close to the center.
-        bomb_x = rand() % (LCDWIDTH - 40) + 12;
-      }
+      // Drop bombs somewhere close to the center.
+      bomb_x = rand() % (LCDWIDTH - 40) + 12;
 
-      if (bomb_y < 0) {
-        // Start at the top.
-        bomb_y = 6;
-      }
+      // Start at the top.
+      bomb_y = 6;
+    }
 
+    if (bomb) {
       // Apply the vertical velocity.
       bomb_y = bomb_y + 1;
 
